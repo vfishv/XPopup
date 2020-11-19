@@ -2,6 +2,7 @@ package com.lxj.xpopupdemo.custom;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,7 @@ import com.lxj.easyadapter.EasyAdapter;
 import com.lxj.easyadapter.MultiItemTypeAdapter;
 import com.lxj.easyadapter.ViewHolder;
 import com.lxj.xpopup.XPopup;
+import com.lxj.xpopup.core.BasePopupView;
 import com.lxj.xpopup.core.BottomPopupView;
 import com.lxj.xpopup.interfaces.SimpleCallback;
 import com.lxj.xpopup.util.XPopupUtils;
@@ -52,11 +54,11 @@ public class ZhihuCommentPopup extends BottomPopupView {
 //                        .hasShadowBg(false)
                         .setPopupCallback(new SimpleCallback() {
                             @Override
-                            public void onShow() {
+                            public void onShow(BasePopupView popupView) {
                             }
 
                             @Override
-                            public void onDismiss() {
+                            public void onDismiss(BasePopupView popupView) {
                                 String comment = textBottomPopup.getComment();
                                 if (!comment.isEmpty()) {
                                     data.add(0, comment);
@@ -112,16 +114,19 @@ public class ZhihuCommentPopup extends BottomPopupView {
     @Override
     protected void onShow() {
         super.onShow();
+        Log.e("tag", "知乎评论 onShow");
     }
 
     //完全消失执行
     @Override
     protected void onDismiss() {
+        Log.e("tag", "知乎评论 onDismiss");
 
     }
 
     @Override
     protected int getMaxHeight() {
-        return (int) (XPopupUtils.getWindowHeight(getContext()) * .85f);
+//        return XPopupUtils.getWindowHeight(getContext());
+        return (int) (XPopupUtils.getWindowHeight(getContext()) * .9f);
     }
 }

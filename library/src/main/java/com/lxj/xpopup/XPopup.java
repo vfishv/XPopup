@@ -3,11 +3,11 @@ package com.lxj.xpopup;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PointF;
-import android.util.Log;
+import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
-
+import androidx.annotation.RequiresApi;
 import com.lxj.xpopup.animator.PopupAnimator;
 import com.lxj.xpopup.core.AttachPopupView;
 import com.lxj.xpopup.core.BasePopupView;
@@ -32,21 +32,20 @@ import com.lxj.xpopup.interfaces.OnSelectListener;
 import com.lxj.xpopup.interfaces.OnSrcViewUpdateListener;
 import com.lxj.xpopup.interfaces.XPopupCallback;
 import com.lxj.xpopup.interfaces.XPopupImageLoader;
-
+import com.lxj.xpopup.util.XPermission;
 import java.util.List;
 
 
 public class XPopup {
-    private XPopup() {
-    }
+    private XPopup() { }
 
     /**
      * 全局弹窗的设置
      **/
     private static int primaryColor = Color.parseColor("#121212");
-    private static int animationDuration = 300;
+    private static int animationDuration = 350;
     public static int statusBarShadowColor = Color.parseColor("#55000000");
-    private static int shadowBgColor = Color.parseColor("#9F000000");
+    private static int shadowBgColor = Color.parseColor("#6F000000");
 
     public static void setShadowBgColor(int color) {
         shadowBgColor = color;
@@ -137,7 +136,18 @@ public class XPopup {
         }
 
         /**
-         * 设置弹窗依附的View
+         * 是否设置背景为高斯模糊背景。默认为false
+         *
+         * @param hasBlurBg
+         * @return
+         */
+        public Builder hasBlurBg(boolean hasBlurBg) {
+            this.popupInfo.hasBlurBg = hasBlurBg;
+            return this;
+        }
+
+        /**
+         * 设置弹窗依附的View，Attach弹窗必须设置这个
          *
          * @param atView
          * @return
@@ -257,6 +267,39 @@ public class XPopup {
         }
 
         /**
+         * 设置是否显示状态栏，默认是显示的
+         *
+         * @param hasStatusBar
+         * @return
+         */
+        public Builder hasStatusBar(boolean hasStatusBar) {
+            this.popupInfo.hasStatusBar = hasStatusBar;
+            return this;
+        }
+
+        /**
+         * 设置是否显示导航栏，默认是显示的
+         *
+         * @param hasNavigationBar
+         * @return
+         */
+        public Builder hasNavigationBar(boolean hasNavigationBar) {
+            this.popupInfo.hasNavigationBar = hasNavigationBar;
+            return this;
+        }
+
+        /**
+         * 设置导航栏的颜色，如果你想自定义弹窗的导航栏颜色就设置这个
+         *
+         * @param navigationBarColor
+         * @return
+         */
+        public Builder navigationBarColor(int navigationBarColor) {
+            this.popupInfo.navigationBarColor = navigationBarColor;
+            return this;
+        }
+
+        /**
          * 弹窗在x方向的偏移量，对所有弹窗生效，单位是px
          *
          * @param offsetX
@@ -312,7 +355,7 @@ public class XPopup {
         }
 
         /**
-         * 是否让弹窗内的输入框自动获取焦点，默认是true。
+         * 是否让弹窗内的输入框自动获取焦点，默认是true。弹窗内有输入法的情况下该设置才有效
          *
          * @param autoFocusEditText
          * @return
@@ -334,15 +377,75 @@ public class XPopup {
         }
 
         /**
-         * 是否点击弹窗背景时将点击事件透传到Activity下，默认是不透传，目前会引发很多不可控的问题，暂时关闭。
+         * 是否点击弹窗背景时将点击事件透传到Activity下，默认是不透传。由于容易引发其他问题，目前只对PartShadow弹窗有效。
          *
          * @param isClickThrough
          * @return
          */
-//        public Builder isClickThrough(boolean isClickThrough) {
-//            this.popupInfo.isClickThrough = isClickThrough;
-//            return this;
-//        }
+        public Builder isClickThrough(boolean isClickThrough) {
+            this.popupInfo.isClickThrough = isClickThrough;
+            return this;
+        }
+
+        /**
+         * 是否允许应用在后台的时候也能弹出弹窗，默认是false。注意如果开启这个开关，需要申请悬浮窗权限才能生效。
+         *
+         * @param enableShowWhenAppBackground
+         * @return
+         */
+        public Builder enableShowWhenAppBackground(boolean enableShowWhenAppBackground) {
+            this.popupInfo.enableShowWhenAppBackground = enableShowWhenAppBackground;
+            return this;
+        }
+
+        /**
+         * 是否开启三阶拖拽效果，想高德地图上面的弹窗那样可以拖拽的效果
+         *
+         * @param isThreeDrag
+         * @return
+         */
+        public Builder isThreeDrag(boolean isThreeDrag) {
+            this.popupInfo.isThreeDrag = isThreeDrag;
+            return this;
+        }
+
+        /**
+         * 是否在弹窗消失后就立即释放资源，杜绝内存泄漏，仅仅适用于弹窗只用一次的场景，默认为false。
+         * 如果你的弹窗对象需要用多次，千万不要开启这个设置
+         *
+         * @param isDestroyOnDismiss
+         * @return
+         */
+        public Builder isDestroyOnDismiss(boolean isDestroyOnDismiss) {
+            this.popupInfo.isDestroyOnDismiss = isDestroyOnDismiss;
+            return this;
+        }
+
+        /**
+         * 设置圆角，对所有内置弹窗有效
+         *
+         * @param borderRadius
+         * @return
+         */
+        public Builder borderRadius(float borderRadius) {
+            this.popupInfo.borderRadius = borderRadius;
+            return this;
+        }
+
+        /**
+         * 是否已屏幕中心进行定位，默认是false，为false时根据Material范式进行定位，主要影响Attach系列弹窗
+         * Material范式下是：
+         *      弹窗优先显示在目标下方，下方距离不够才显示在上方
+         * 已屏幕中心进行定位：
+         *      目标在屏幕上半方弹窗显示在目标下面，目标在屏幕下半方则弹窗显示在目标上面
+         *
+         * @param positionByWindowCenter
+         * @return
+         */
+        public Builder positionByWindowCenter(boolean positionByWindowCenter) {
+            this.popupInfo.positionByWindowCenter = positionByWindowCenter;
+            return this;
+        }
 
         /**
          * 设置弹窗显示和隐藏的回调监听
@@ -366,26 +469,32 @@ public class XPopup {
          * @param confirmListener 点击确认的监听器
          * @param cancelListener  点击取消的监听器
          * @param isHideCancel    是否隐藏取消按钮
+         * @param bindLayoutId    自定义的布局Id，没有则传0；要求自定义布局中必须包含的TextView以及id有：tv_title，tv_content，tv_cancel，tv_confirm
          * @return
          */
-        public ConfirmPopupView asConfirm(CharSequence title, CharSequence content, CharSequence cancelBtnText, CharSequence confirmBtnText, OnConfirmListener confirmListener, OnCancelListener cancelListener, boolean isHideCancel) {
+        public ConfirmPopupView asConfirm(CharSequence title, CharSequence content, CharSequence cancelBtnText, CharSequence confirmBtnText, OnConfirmListener confirmListener, OnCancelListener cancelListener, boolean isHideCancel,
+                                          int bindLayoutId) {
             popupType(PopupType.Center);
-            ConfirmPopupView popupView = new ConfirmPopupView(this.context);
+            ConfirmPopupView popupView = new ConfirmPopupView(this.context, bindLayoutId);
             popupView.setTitleContent(title, content, null);
             popupView.setCancelText(cancelBtnText);
             popupView.setConfirmText(confirmBtnText);
             popupView.setListener(confirmListener, cancelListener);
-            if (isHideCancel) popupView.hideCancelBtn();
+            popupView.isHideCancel = isHideCancel;
             popupView.popupInfo = this.popupInfo;
             return popupView;
         }
 
+        public ConfirmPopupView asConfirm(CharSequence title, CharSequence content, CharSequence cancelBtnText, CharSequence confirmBtnText, OnConfirmListener confirmListener, OnCancelListener cancelListener, boolean isHideCancel) {
+            return asConfirm(title, content, cancelBtnText, confirmBtnText, confirmListener, cancelListener, isHideCancel, 0);
+        }
+
         public ConfirmPopupView asConfirm(CharSequence title, CharSequence content, OnConfirmListener confirmListener, OnCancelListener cancelListener) {
-            return asConfirm(title, content, null, null, confirmListener, cancelListener, false);
+            return asConfirm(title, content, null, null, confirmListener, cancelListener, false, 0);
         }
 
         public ConfirmPopupView asConfirm(CharSequence title, CharSequence content, OnConfirmListener confirmListener) {
-            return asConfirm(title, content, null, null, confirmListener, null, false);
+            return asConfirm(title, content, null, null, confirmListener, null, false, 0);
         }
 
         /**
@@ -397,11 +506,12 @@ public class XPopup {
          * @param hint            输入框默认文字
          * @param confirmListener 点击确认的监听器
          * @param cancelListener  点击取消的监听器
+         * @param bindLayoutId   自定义布局的id，没有传0。 要求布局中必须包含的TextView以及id有：tv_title，tv_content，tv_cancel，tv_confirm
          * @return
          */
-        public InputConfirmPopupView asInputConfirm(CharSequence title, CharSequence content, CharSequence inputContent, CharSequence hint, OnInputConfirmListener confirmListener, OnCancelListener cancelListener) {
+        public InputConfirmPopupView asInputConfirm(CharSequence title, CharSequence content, CharSequence inputContent, CharSequence hint, OnInputConfirmListener confirmListener, OnCancelListener cancelListener, int bindLayoutId) {
             popupType(PopupType.Center);
-            InputConfirmPopupView popupView = new InputConfirmPopupView(this.context);
+            InputConfirmPopupView popupView = new InputConfirmPopupView(this.context, bindLayoutId);
             popupView.setTitleContent(title, content, hint);
             popupView.inputContent = inputContent;
             popupView.setListener(confirmListener, cancelListener);
@@ -410,34 +520,41 @@ public class XPopup {
         }
 
         public InputConfirmPopupView asInputConfirm(CharSequence title, CharSequence content, CharSequence inputContent, CharSequence hint, OnInputConfirmListener confirmListener) {
-            return asInputConfirm(title, content, inputContent, hint, confirmListener, null);
+            return asInputConfirm(title, content, inputContent, hint, confirmListener, null, 0);
         }
 
         public InputConfirmPopupView asInputConfirm(CharSequence title, CharSequence content, CharSequence hint, OnInputConfirmListener confirmListener) {
-            return asInputConfirm(title, content, null, hint, confirmListener, null);
+            return asInputConfirm(title, content, null, hint, confirmListener, null, 0);
         }
 
         public InputConfirmPopupView asInputConfirm(CharSequence title, CharSequence content, OnInputConfirmListener confirmListener) {
-            return asInputConfirm(title, content, null, null, confirmListener, null);
+            return asInputConfirm(title, content, null, null, confirmListener, null, 0);
         }
 
         /**
          * 显示在中间的列表Popup
          *
-         * @param title          标题，可以不传，不传则不显示
-         * @param data           显示的文本数据
-         * @param iconIds        图标的id数组，可以没有
-         * @param selectListener 选中条目的监听器
+         * @param title            标题，可以不传，不传则不显示
+         * @param data             显示的文本数据
+         * @param iconIds          图标的id数组，可以没有
+         * @param selectListener   选中条目的监听器
+         * @param bindLayoutId     自定义布局的id 要求layoutId中必须有一个id为recyclerView的RecyclerView，如果你需要显示标题，则必须有一个id为tv_title的TextView
+         * @param bindItemLayoutId 自定义列表的item布局 条目的布局id，要求布局中必须有id为iv_image的ImageView，和id为tv_text的TextView
          * @return
          */
-        public CenterListPopupView asCenterList(CharSequence title, String[] data, int[] iconIds, int checkedPosition, OnSelectListener selectListener) {
+        public CenterListPopupView asCenterList(CharSequence title, String[] data, int[] iconIds, int checkedPosition, OnSelectListener selectListener, int bindLayoutId,
+                                                int bindItemLayoutId) {
             popupType(PopupType.Center);
-            CenterListPopupView popupView = new CenterListPopupView(this.context)
+            CenterListPopupView popupView = new CenterListPopupView(this.context, bindLayoutId, bindItemLayoutId)
                     .setStringData(title, data, iconIds)
                     .setCheckedPosition(checkedPosition)
                     .setOnSelectListener(selectListener);
             popupView.popupInfo = this.popupInfo;
             return popupView;
+        }
+
+        public CenterListPopupView asCenterList(CharSequence title, String[] data, int[] iconIds, int checkedPosition, OnSelectListener selectListener) {
+            return asCenterList(title, data, iconIds, checkedPosition, selectListener, 0, 0);
         }
 
         public CenterListPopupView asCenterList(CharSequence title, String[] data, OnSelectListener selectListener) {
@@ -451,14 +568,20 @@ public class XPopup {
         /**
          * 显示在中间加载的弹窗
          *
+         * @param title        加载中的文字
+         * @param bindLayoutId 自定义布局id 如果要显示标题，则要求必须有id为tv_title的TextView，否则无任何要求
          * @return
          */
-        public LoadingPopupView asLoading(CharSequence title) {
+        public LoadingPopupView asLoading(CharSequence title, int bindLayoutId) {
             popupType(PopupType.Center);
-            LoadingPopupView popupView = new LoadingPopupView(this.context)
+            LoadingPopupView popupView = new LoadingPopupView(this.context, bindLayoutId)
                     .setTitle(title);
             popupView.popupInfo = this.popupInfo;
             return popupView;
+        }
+
+        public LoadingPopupView asLoading(CharSequence title) {
+            return asLoading(title, 0);
         }
 
         public LoadingPopupView asLoading() {
@@ -468,21 +591,28 @@ public class XPopup {
         /**
          * 显示在底部的列表Popup
          *
-         * @param title           标题，可以不传，不传则不显示
-         * @param data            显示的文本数据
-         * @param iconIds         图标的id数组，可以没有
-         * @param checkedPosition 选中的位置，传-1为不选中
-         * @param selectListener  选中条目的监听器
+         * @param title            标题，可以不传，不传则不显示
+         * @param data             显示的文本数据
+         * @param iconIds          图标的id数组，可以没有
+         * @param checkedPosition  选中的位置，传-1为不选中
+         * @param selectListener   选中条目的监听器
+         * @param bindLayoutId     自定义布局的id  要求layoutId中必须有一个id为recyclerView的RecyclerView，如果你需要显示标题，则必须有一个id为tv_title的TextView
+         * @param bindItemLayoutId 自定义列表的item布局  条目的布局id，要求布局中必须有id为iv_image的ImageView，和id为tv_text的TextView
          * @return
          */
-        public BottomListPopupView asBottomList(CharSequence title, String[] data, int[] iconIds, int checkedPosition, boolean enableDrag, OnSelectListener selectListener) {
+        public BottomListPopupView asBottomList(CharSequence title, String[] data, int[] iconIds, int checkedPosition, boolean enableDrag, OnSelectListener selectListener, int bindLayoutId,
+                                                int bindItemLayoutId) {
             popupType(PopupType.Bottom);
-            BottomListPopupView popupView = new BottomListPopupView(this.context)
+            BottomListPopupView popupView = new BottomListPopupView(this.context, bindLayoutId, bindItemLayoutId)
                     .setStringData(title, data, iconIds)
                     .setCheckedPosition(checkedPosition)
                     .setOnSelectListener(selectListener);
             popupView.popupInfo = this.popupInfo;
             return popupView;
+        }
+
+        public BottomListPopupView asBottomList(CharSequence title, String[] data, int[] iconIds, int checkedPosition, boolean enableDrag, OnSelectListener selectListener) {
+            return asBottomList(title, data, iconIds, checkedPosition, enableDrag, selectListener, 0, 0);
         }
 
         public BottomListPopupView asBottomList(CharSequence title, String[] data, OnSelectListener selectListener) {
@@ -505,25 +635,25 @@ public class XPopup {
         /**
          * 显示依附于某View的列表，必须调用atView()方法，指定依附的View
          *
-         * @param data           显示的文本数据
-         * @param iconIds        图标的id数组，可以为null
-         * @param offsetX        x方向偏移量
-         * @param offsetY        y方向偏移量
-         * @param selectListener 选中条目的监听器
+         * @param data             显示的文本数据
+         * @param iconIds          图标的id数组，可以为null
+         * @param selectListener   选中条目的监听器
+         * @param bindLayoutId     自定义布局的id  要求layoutId中必须有一个id为recyclerView的RecyclerView
+         * @param bindItemLayoutId 自定义列表的item布局  条目的布局id，要求布局中必须有id为iv_image的ImageView，和id为tv_text的TextView
          * @return
          */
-        public AttachListPopupView asAttachList(String[] data, int[] iconIds, int offsetX, int offsetY, OnSelectListener selectListener) {
+        public AttachListPopupView asAttachList(String[] data, int[] iconIds, OnSelectListener selectListener, int bindLayoutId,
+                                                int bindItemLayoutId) {
             popupType(PopupType.AttachView);
-            AttachListPopupView popupView = new AttachListPopupView(this.context)
+            AttachListPopupView popupView = new AttachListPopupView(this.context, bindLayoutId, bindItemLayoutId)
                     .setStringData(data, iconIds)
-                    .setOffsetXAndY(offsetX, offsetY)
                     .setOnSelectListener(selectListener);
             popupView.popupInfo = this.popupInfo;
             return popupView;
         }
 
         public AttachListPopupView asAttachList(String[] data, int[] iconIds, OnSelectListener selectListener) {
-            return asAttachList(data, iconIds, 0, 0, selectListener);
+            return asAttachList(data, iconIds, selectListener, 0, 0);
         }
 
         /**
@@ -579,7 +709,7 @@ public class XPopup {
          */
         public ImageViewerPopupView asImageViewer(ImageView srcView, int currentPosition, List<Object> urls,
                                                   OnSrcViewUpdateListener srcViewUpdateListener, XPopupImageLoader imageLoader) {
-            return asImageViewer(srcView, currentPosition, urls, false,false, -1, -1, -1, true, srcViewUpdateListener, imageLoader);
+            return asImageViewer(srcView, currentPosition, urls, false, true, -1, -1, -1, true, srcViewUpdateListener, imageLoader);
         }
 
         /**
@@ -633,5 +763,20 @@ public class XPopup {
             return popupView;
         }
 
+    }
+
+    /**
+     * 跳转申请悬浮窗权限界面
+     *
+     * @param context
+     * @param callback
+     */
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public static void requestOverlayPermission(Context context, XPermission.SimpleCallback callback) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            XPermission.create(context).requestDrawOverlays(callback);
+        } else {
+            callback.onGranted();
+        }
     }
 }

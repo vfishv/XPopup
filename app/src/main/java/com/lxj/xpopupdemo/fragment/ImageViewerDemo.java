@@ -6,10 +6,15 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
+
+import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+
+import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
@@ -22,9 +27,8 @@ import com.lxj.xpopup.interfaces.OnSrcViewUpdateListener;
 import com.lxj.xpopup.interfaces.XPopupImageLoader;
 import com.lxj.xpopupdemo.R;
 import com.lxj.xpopupdemo.custom.CustomImageViewerPopup;
-
 import java.io.File;
-import java.util.ArrayList;
+import static com.lxj.xpopupdemo.Constants.list;
 
 /**
  * Description:
@@ -40,22 +44,16 @@ public class ImageViewerDemo extends BaseFragment {
         return R.layout.fragment_image_preview;
     }
 
-    public static ArrayList<Object> list = new ArrayList<>();
-
     static {
         list.clear();
-        list.add("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1548756837006&di=551df0dcf59d1d71673c3d46b33f0d93&imgtype=0&src=http%3A%2F%2Fimg5.duitang.com%2Fuploads%2Fitem%2F201308%2F04%2F20130804155912_wCRnE.thumb.700_0.jpeg");
         list.add("https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=2279952540,2544282724&fm=26&gp=0.jpg");
         list.add("https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=851052518,4050485518&fm=26&gp=0.jpg");
         list.add("https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=174904559,2874238085&fm=26&gp=0.jpg");
-        list.add("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1548764579122&di=e3a46d9075ee49ecefb552a447974ddc&imgtype=0&src=http%3A%2F%2Fimg5q.duitang.com%2Fuploads%2Fitem%2F201112%2F03%2F20111203233836_3wu5E.thumb.700_0.jpg");
         list.add("https://user-gold-cdn.xitu.io/2019/1/25/168839e977414cc1?imageView2/2/w/800/q/100");
         list.add("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1551692956639&di=8ee41e070c6a42addfc07522fda3b6c8&imgtype=0&src=http%3A%2F%2Fimg.mp.itc.cn%2Fupload%2F20160413%2F75659e9b05b04eb8adf5b52669394897.jpg");
-        list.add("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1548756837006&di=551df0dcf59d1d71673c3d46b33f0d93&imgtype=0&src=http%3A%2F%2Fimg5.duitang.com%2Fuploads%2Fitem%2F201308%2F04%2F20130804155912_wCRnE.thumb.700_0.jpeg");
         list.add("https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=2279952540,2544282724&fm=26&gp=0.jpg");
         list.add("https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=851052518,4050485518&fm=26&gp=0.jpg");
         list.add("https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=174904559,2874238085&fm=26&gp=0.jpg");
-        list.add("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1548764579122&di=e3a46d9075ee49ecefb552a447974ddc&imgtype=0&src=http%3A%2F%2Fimg5q.duitang.com%2Fuploads%2Fitem%2F201112%2F03%2F20111203233836_3wu5E.thumb.700_0.jpg");
         list.add("https://user-gold-cdn.xitu.io/2019/1/25/168839e977414cc1?imageView2/2/w/800/q/100");
         list.add("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1551692956639&di=8ee41e070c6a42addfc07522fda3b6c8&imgtype=0&src=http%3A%2F%2Fimg.mp.itc.cn%2Fupload%2F20160413%2F75659e9b05b04eb8adf5b52669394897.jpg");
     }
@@ -63,26 +61,28 @@ public class ImageViewerDemo extends BaseFragment {
     RecyclerView recyclerView;
     ImageView image1, image2;
     ViewPager pager;
+    ViewPager2 pager2;
     Button btn_custom;
     @Override
     public void init(final View view) {
         image1 = view.findViewById(R.id.image1);
         image2 = view.findViewById(R.id.image2);
         pager = view.findViewById(R.id.pager);
+        pager2 = view.findViewById(R.id.pager2);
         btn_custom = view.findViewById(R.id.btn_custom);
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
-
         recyclerView.setAdapter(new ImageAdapter());
 
 
-        Glide.with(this).load(url1).apply(new RequestOptions().placeholder(R.mipmap.ic_launcher_round).override(Target.SIZE_ORIGINAL).transform(new RoundedCorners(50))).into(image1);
+        Glide.with(this).load(url1).into(image1);
         Glide.with(this).load(url2).into(image2);
         image1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new XPopup.Builder(getContext())
-                        .asImageViewer(image1, url1, true, -1, -1, 50, false,new ImageLoader())
+                        .isDestroyOnDismiss(true)
+                        .asImageViewer(image1, url1, true, Color.parseColor("#f1f1f1"), -1, 0, false,new ImageLoader())
                         .show();
             }
         });
@@ -112,10 +112,13 @@ public class ImageViewerDemo extends BaseFragment {
 //                viewerPopup.isShowPlaceholder(false);//是否显示白色占位块
 //                viewerPopup.isShowSaveButton(false);//是否显示保存按钮
                 new XPopup.Builder(getContext())
+                        .isDestroyOnDismiss(true)
                         .asCustom(viewerPopup)
                         .show();
             }
         });
+
+        pager2.setAdapter(new ImageAdapter2());
     }
 
     public static class ImageAdapter extends EasyAdapter<Object> {
@@ -126,23 +129,61 @@ public class ImageViewerDemo extends BaseFragment {
         @Override
         protected void bind(@NonNull final ViewHolder holder, @NonNull final Object s, final int position) {
             final ImageView imageView = holder.<ImageView>getView(R.id.image);
-            //1. 加载图片, 由于ImageView是centerCrop，必须指定Target.SIZE_ORIGINAL，禁止Glide裁剪图片；
-            // 这样我就能拿到原始图片的Matrix，才能有完美的过渡效果
-            Glide.with(imageView).load(s).apply(new RequestOptions().placeholder(R.mipmap.ic_launcher_round)
-                    .override(Target.SIZE_ORIGINAL))
-                    .into(imageView);
+            //1. 加载图片
+            Glide.with(imageView).load(s).into(imageView);
 
             //2. 设置点击
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new XPopup.Builder(holder.itemView.getContext()).asImageViewer(imageView, position, list, new OnSrcViewUpdateListener() {
+
+                    new XPopup.Builder(holder.itemView.getContext()).asImageViewer(imageView, position, list,
+                            new OnSrcViewUpdateListener() {
                         @Override
                         public void onSrcViewUpdate(ImageViewerPopupView popupView, int position) {
                             RecyclerView rv = (RecyclerView) holder.itemView.getParent();
                             popupView.updateSrcView((ImageView)rv.getChildAt(position));
                         }
                     }, new ImageLoader())
+                            .show();
+                }
+            });
+        }
+    }
+
+    //ViewPager2的adapter
+    public class ImageAdapter2 extends EasyAdapter<Object> {
+        public ImageAdapter2() {
+            super(list, R.layout.adapter_image2);
+        }
+
+        @Override
+        protected void bind(@NonNull final ViewHolder holder, @NonNull final Object s, final int position) {
+            final ImageView imageView = holder.<ImageView>getView(R.id.image);
+            //1. 加载图片
+            Glide.with(imageView).load(s).into(imageView);
+
+            //2. 设置点击
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    new XPopup.Builder(holder.itemView.getContext()).asImageViewer(imageView, position, list,
+                            new OnSrcViewUpdateListener() {
+                                @Override
+                                public void onSrcViewUpdate(final ImageViewerPopupView popupView, final int position) {
+                                    pager2.setCurrentItem(position, false);
+                                    //一定要post，因为setCurrentItem内部实现是RecyclerView.scrollTo()，这个是异步的
+                                    pager2.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            //由于ViewPager2内部是包裹了一个RecyclerView，而RecyclerView始终维护一个子View
+                                            RecyclerView rv = (RecyclerView) pager2.getChildAt(0);
+                                            //再拿子View，就是ImageView
+                                            popupView.updateSrcView((ImageView)rv.getChildAt(0));
+                                        }
+                                    });
+                                }
+                            }, new ImageLoader())
                             .show();
                 }
             });
@@ -168,8 +209,7 @@ public class ImageViewerDemo extends BaseFragment {
             container.addView(imageView);
 
             //1. 加载图片
-            Glide.with(imageView).load(list.get(position)).apply(new RequestOptions().placeholder(R.mipmap.ic_launcher_round).override(Target.SIZE_ORIGINAL))
-                    .into(imageView);
+            Glide.with(imageView).load(list.get(position)).into(imageView);
             //2. 设置点击
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -205,9 +245,8 @@ public class ImageViewerDemo extends BaseFragment {
         @Override
         public void loadImage(int position, @NonNull Object url, @NonNull ImageView imageView) {
             //必须指定Target.SIZE_ORIGINAL，否则无法拿到原图，就无法享用天衣无缝的动画
-            Glide.with(imageView).load(url).apply(new RequestOptions().placeholder(R.mipmap.ic_launcher_round).override(Target.SIZE_ORIGINAL)).into(imageView);
+            Glide.with(imageView).load(url).apply(new RequestOptions().override(Target.SIZE_ORIGINAL)).into(imageView);
         }
-
         @Override
         public File getImageFile(@NonNull Context context, @NonNull Object uri) {
             try {

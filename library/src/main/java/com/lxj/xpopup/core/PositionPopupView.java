@@ -4,12 +4,10 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
-
 import com.lxj.xpopup.R;
 import com.lxj.xpopup.animator.PopupAnimator;
-import com.lxj.xpopup.animator.ScrollScaleAnimator;
+import com.lxj.xpopup.animator.ScaleAlphaAnimator;
 import com.lxj.xpopup.util.XPopupUtils;
 import com.lxj.xpopup.widget.PartShadowContainer;
 
@@ -25,7 +23,6 @@ public class PositionPopupView extends BasePopupView {
     public PositionPopupView(@NonNull Context context) {
         super(context);
         attachPopupContainer = findViewById(R.id.attachPopupContainer);
-
         View contentView = LayoutInflater.from(getContext()).inflate(getImplLayoutId(), attachPopupContainer, false);
         attachPopupContainer.addView(contentView);
     }
@@ -42,7 +39,8 @@ public class PositionPopupView extends BasePopupView {
             @Override
             public void run() {
                 if (popupInfo.isCenterHorizontal) {
-                    float left = (XPopupUtils.getWindowWidth(getContext())-attachPopupContainer.getMeasuredWidth())/2f;
+                    float left = !XPopupUtils.isLayoutRtl(getContext()) ? (XPopupUtils.getWindowWidth(getContext())-attachPopupContainer.getMeasuredWidth())/2f
+                    : -( XPopupUtils.getWindowWidth(getContext())-attachPopupContainer.getMeasuredWidth())/2f;
                     attachPopupContainer.setTranslationX(left);
                 }else {
                     attachPopupContainer.setTranslationX(popupInfo.offsetX);
@@ -54,6 +52,6 @@ public class PositionPopupView extends BasePopupView {
 
     @Override
     protected PopupAnimator getPopupAnimator() {
-        return new ScrollScaleAnimator(getPopupContentView(), ScaleAlphaFromCenter);
+        return new ScaleAlphaAnimator(getPopupContentView(), ScaleAlphaFromCenter);
     }
 }

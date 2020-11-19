@@ -2,10 +2,19 @@
 ![](https://api.bintray.com/packages/li-xiaojun/jrepo/xpopup/images/download.svg)  ![](https://img.shields.io/badge/platform-android-blue.svg)  ![](https://img.shields.io/badge/author-li--xiaojun-brightgreen.svg) ![](https://img.shields.io/badge/compileSdkVersion-26-blue.svg) ![](https://img.shields.io/badge/minSdkVersion-15-blue.svg) ![](https://img.shields.io/hexpm/l/plug.svg)
 ![](screenshot/logo.png)
 
+<a href="https://tracking.gitads.io/?repo=XPopup"><img src="https://images.gitads.io/XPopup" style="width: 80%;height:auto"/></a>
+
+### You can click the Ad Image to buy me a coffee!!!
+
 ### English | [中文]()
 
 Powerful，material UI，elegant interaction general popup！can absolutely replace Dialog，PopupWindow，PopupMenu，BottomSheet，DrawerLayout，Spinner. With built-in many beautiful animation，you can custom your UI and logic！
 
+## Feature
+- support Androidx
+- support RTL layout
+- beautiful animation and strong customization
+- you will love it !
 
 ## ScreenShot
 
@@ -30,9 +39,9 @@ Powerful，material UI，elegant interaction general popup！can absolutely repl
 ## Download Apk
 
 Scan qrcode to download Demo.apk：
-![](screenshot/download.png)
+![](screenshot/download.jpeg)
 
-If the qrcode is invisible，[click me to download Demo.apk](https://fir.im/2q63)
+如果二维码图片不可见，[点我下载Demo体验](http://d.7short.com/2q63)
 
 
 

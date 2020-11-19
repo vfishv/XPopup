@@ -2,8 +2,7 @@ package com.lxj.xpopupdemo;
 
 import android.app.Application;
 import android.content.Context;
-
-import com.squareup.leakcanary.LeakCanary;
+import com.tencent.bugly.crashreport.CrashReport;
 
 /**
  * Description:
@@ -15,9 +14,6 @@ public class XPopupApp extends Application {
     public void onCreate() {
         super.onCreate();
         context = this;
-//        if (LeakCanary.isInAnalyzerProcess(this)) {
-//            return;
-//        }
-//        LeakCanary.install(this);
+        CrashReport.initCrashReport(getApplicationContext(), "e494d36dcc", false);
     }
 }

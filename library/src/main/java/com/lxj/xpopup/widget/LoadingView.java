@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
-
 import com.lxj.xpopup.util.XPopupUtils;
 
 /**
@@ -21,9 +20,9 @@ public class LoadingView extends View {
     // 不是固定不变的，当width为30dp时，它为2dp，当宽度变大，这个也会相应的变大
     private float stokeWidth = 2f;
     private ArgbEvaluator argbEvaluator = new ArgbEvaluator();
-    private int startColor = Color.parseColor("#CCCCCC");
-    private int endColor = Color.parseColor("#333333");
-    int lineCount = 12; // 共12条线
+    private int startColor = Color.parseColor("#EEEEEE");
+    private int endColor = Color.parseColor("#111111");
+    int lineCount = 10; // 共12条线
     float avgAngle = 360f / lineCount;
     int time = 0; // 重复次数
     float centerX, centerY; // 中心x，y
@@ -43,6 +42,7 @@ public class LoadingView extends View {
         paint.setStrokeWidth(stokeWidth);
     }
 
+    float startX, endX;
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -54,10 +54,14 @@ public class LoadingView extends View {
 
         stokeWidth *= getMeasuredWidth() * 1f / XPopupUtils.dp2px(getContext(), 30);
         paint.setStrokeWidth(stokeWidth);
+        startX = centerX + radiusOffset;
+        endX = startX + radius / 3f;
+        removeCallbacks(increaseTask);
     }
 
     @Override
     protected void onDraw(final Canvas canvas) {
+        super.onDraw(canvas);
         // 1 2 3 4 5
         // 2 3 4 5 1
         // 3 4 5 1 2
@@ -68,22 +72,20 @@ public class LoadingView extends View {
             int color = (int) argbEvaluator.evaluate(fraction, startColor, endColor);
             paint.setColor(color);
 
-            float startX = centerX + radiusOffset;
-            float endX = startX + radius / 3f;
             canvas.drawLine(startX, centerY, endX, centerY, paint);
             // 线的两端画个点，看着圆滑
             canvas.drawCircle(startX, centerY, stokeWidth / 2, paint);
             canvas.drawCircle(endX, centerY, stokeWidth / 2, paint);
             canvas.rotate(avgAngle, centerX, centerY);
         }
-        postDelayed(increaseTask, 80);
+        postDelayed(increaseTask, 70);
     }
 
     private Runnable increaseTask = new Runnable() {
         @Override
         public void run() {
             time++;
-            invalidate();
+            postInvalidate(0,0,getMeasuredWidth(), getMeasuredHeight());
         }
     };
 
@@ -92,4 +94,5 @@ public class LoadingView extends View {
         super.onDetachedFromWindow();
         removeCallbacks(increaseTask);
     }
+
 }
