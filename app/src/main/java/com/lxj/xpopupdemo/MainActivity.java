@@ -1,22 +1,24 @@
 package com.lxj.xpopupdemo;
 
-import android.content.res.Configuration;
 import android.os.Bundle;
-import android.view.ViewGroup;
-
 import androidx.annotation.Nullable;
-import com.google.android.material.tabs.TabLayout;
-
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.AppCompatActivity;
+
+import com.blankj.utilcode.util.AppUtils;
+import com.blankj.utilcode.util.BarUtils;
+import com.blankj.utilcode.util.KeyboardUtils;
+import com.blankj.utilcode.util.PhoneUtils;
+import com.blankj.utilcode.util.ScreenUtils;
 import com.blankj.utilcode.util.ToastUtils;
+import com.google.android.material.tabs.TabLayout;
 import com.lxj.xpopup.XPopup;
-import com.lxj.xpopup.util.navbar.NavigationBarObserver;
-import com.lxj.xpopup.util.navbar.OnNavigationBarListener;
+import com.lxj.xpopup.impl.LoadingPopupView;
+import com.lxj.xpopup.util.FuckRomUtils;
 import com.lxj.xpopupdemo.fragment.AllAnimatorDemo;
 import com.lxj.xpopupdemo.fragment.CustomAnimatorDemo;
 import com.lxj.xpopupdemo.fragment.CustomPopupDemo;
@@ -38,13 +40,17 @@ public class MainActivity extends AppCompatActivity {
     TabLayout tabLayout;
     public ViewPager viewPager;
 
+    LoadingPopupView loadingPopupView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+//        BarUtils.setStatusBarLightMode(this, true);
+//        BarUtils.setNavBarColor(this, Color.RED);
+
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle(actionBar.getTitle() + BuildConfig.VERSION_NAME);
+        actionBar.setTitle(actionBar.getTitle() + "-" + BuildConfig.VERSION_NAME);
 
         tabLayout = findViewById(R.id.tabLayout);
         viewPager = findViewById(R.id.viewPager);
@@ -55,11 +61,16 @@ public class MainActivity extends AppCompatActivity {
         XPopup.setPrimaryColor(getResources().getColor(R.color.colorPrimary));
 //        XPopup.setAnimationDuration(1000);
 //        XPopup.setPrimaryColor(Color.RED);
-    }
+//        ScreenUtils.setLandscape(this);
+        loadingPopupView = new XPopup.Builder(this).asLoading("嘻嘻嘻嘻嘻");
+        loadingPopupView.show();
+        loadingPopupView.delayDismiss(1200);
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+//        BarUtils.setStatusBarVisibility(this, false);
+//        BarUtils.setNavBarVisibility(this, false);
+
+//        ToastUtils.showLong(FuckRomUtils.getRomInfo().getName() + FuckRomUtils.getRomInfo().getVersion());
+//        ToastUtils.showLong(android.os.Build.MODEL);
     }
 
     class MainAdapter extends FragmentPagerAdapter {
@@ -92,4 +103,5 @@ public class MainActivity extends AppCompatActivity {
         viewPager = null;
         pageInfos = null;
     }
+
 }

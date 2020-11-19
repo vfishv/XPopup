@@ -14,7 +14,7 @@ import com.lxj.xpopupdemo.R;
 import java.util.ArrayList;
 
 /**
- * Description:
+ * Description: 自定义带列表的Drawer弹窗
  * Create by dance, at 2019/1/9
  */
 public class ListDrawerPopupView extends DrawerPopupView {
@@ -48,6 +48,7 @@ public class ListDrawerPopupView extends DrawerPopupView {
         findViewById(R.id.btn).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(data.size()==0)return;
                 data.remove(0);
                 commonAdapter.notifyDataSetChanged();
             }

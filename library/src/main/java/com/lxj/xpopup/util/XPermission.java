@@ -2,7 +2,6 @@ package com.lxj.xpopup.util;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -13,12 +12,10 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.WindowManager;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -141,16 +138,6 @@ public final class XPermission {
      */
     @RequiresApi(api = Build.VERSION_CODES.M)
     public boolean isGrantedDrawOverlays() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            AppOpsManager aom = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-            if (aom == null) return false;
-            int mode = aom.checkOpNoThrow(
-                    "android:system_alert_window",
-                    android.os.Process.myUid(),
-                    context.getPackageName()
-            );
-            return mode == AppOpsManager.MODE_ALLOWED || mode == AppOpsManager.MODE_IGNORED;
-        }
         return Settings.canDrawOverlays(context);
     }
 
@@ -195,10 +182,6 @@ public final class XPermission {
         if(sInstance == null) return new XPermission(context, permissions);
         sInstance.prepare(permissions);
         return sInstance;
-    }
-
-    public static XPermission create(Context context) {
-        return create(context, null);
     }
 
     private boolean isIntentAvailable(final Intent intent) {
@@ -255,17 +238,6 @@ public final class XPermission {
      */
     public XPermission callback(final FullCallback callback) {
         mFullCallback = callback;
-        return this;
-    }
-
-    /**
-     * Set the theme callback.
-     *
-     * @param callback The theme callback.
-     * @return the single {@link com.lxj.xpermission.XPermission} instance
-     */
-    public XPermission theme(final ThemeCallback callback) {
-        mThemeCallback = callback;
         return this;
     }
 
