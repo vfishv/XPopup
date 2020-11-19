@@ -39,6 +39,7 @@ android {
         checkReleaseBuilds false
         abortOnError false
     }
+    /*
     gradle.projectsEvaluated {
         android.applicationVariants.all { variant ->
             variant.outputs.all { output ->
@@ -48,6 +49,7 @@ android {
             }
         }
     }
+    */
 }
 
 dependencies {
