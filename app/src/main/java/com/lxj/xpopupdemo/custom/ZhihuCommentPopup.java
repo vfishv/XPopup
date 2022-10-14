@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -51,7 +52,7 @@ public class ZhihuCommentPopup extends BottomPopupView {
                 final CustomEditTextBottomPopup textBottomPopup = new CustomEditTextBottomPopup(getContext());
                 new XPopup.Builder(getContext())
                         .autoOpenSoftInput(true)
-//                        .hasShadowBg(false)
+                        .autoFocusEditText(true)
                         .setPopupCallback(new SimpleCallback() {
                             @Override
                             public void onShow(BasePopupView popupView) {
@@ -97,16 +98,14 @@ public class ZhihuCommentPopup extends BottomPopupView {
 //                dismiss();
 //                getContext().startActivity(new Intent(getContext(), DemoActivity.class))
                 //可以等消失动画执行完毕再开启新界面
-                dismissWith(new Runnable() {
-                    @Override
-                    public void run() {
-                        getContext().startActivity(new Intent(getContext(), DemoActivity.class));
-                    }
-                });
-
+//                dismissWith(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        getContext().startActivity(new Intent(getContext(), DemoActivity.class));
+//                    }
+//                });
             }
         });
-        recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(commonAdapter);
     }
 
@@ -121,12 +120,16 @@ public class ZhihuCommentPopup extends BottomPopupView {
     @Override
     protected void onDismiss() {
         Log.e("tag", "知乎评论 onDismiss");
-
     }
 
     @Override
     protected int getMaxHeight() {
-//        return XPopupUtils.getWindowHeight(getContext());
-        return (int) (XPopupUtils.getWindowHeight(getContext()) * .9f);
+        return (int) (XPopupUtils.getScreenHeight(getContext()) * .7f);
+    }
+
+    @Override
+    protected boolean onBackPressed() {
+        Toast.makeText(getContext(), "拦截返回", Toast.LENGTH_SHORT).show();
+        return true;
     }
 }

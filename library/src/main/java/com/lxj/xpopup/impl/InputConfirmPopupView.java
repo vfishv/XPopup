@@ -33,9 +33,9 @@ public class InputConfirmPopupView extends ConfirmPopupView implements View.OnCl
     public CharSequence inputContent;
 
     @Override
-    protected void initPopupContent() {
-        super.initPopupContent();
-        et_input.setVisibility(VISIBLE);
+    protected void onCreate() {
+        super.onCreate();
+        XPopupUtils.setVisible(et_input, true);
         if (!TextUtils.isEmpty(hint)) {
             et_input.setHint(hint);
         }
@@ -45,14 +45,15 @@ public class InputConfirmPopupView extends ConfirmPopupView implements View.OnCl
         }
 
         XPopupUtils.setCursorDrawableColor(et_input, XPopup.getPrimaryColor());
-        et_input.post(new Runnable() {
-            @Override
-            public void run() {
-                BitmapDrawable defaultDrawable = XPopupUtils.createBitmapDrawable(getResources(), et_input.getMeasuredWidth(), Color.parseColor("#888888"));
-                BitmapDrawable focusDrawable = XPopupUtils.createBitmapDrawable(getResources(), et_input.getMeasuredWidth(), XPopup.getPrimaryColor());
-                et_input.setBackgroundDrawable(XPopupUtils.createSelector(defaultDrawable, focusDrawable));
-            }
-        });
+        if(bindLayoutId == 0){
+            et_input.post(() -> {
+                if(et_input.getMeasuredWidth()>0){
+                    BitmapDrawable defaultDrawable = XPopupUtils.createBitmapDrawable(getContext(), et_input.getMeasuredWidth(), Color.parseColor("#888888"));
+                    BitmapDrawable focusDrawable = XPopupUtils.createBitmapDrawable(getContext(), et_input.getMeasuredWidth(), XPopup.getPrimaryColor());
+                    et_input.setBackgroundDrawable(XPopupUtils.createSelector(defaultDrawable, focusDrawable));
+                }
+            });
+        }
     }
 
     public EditText getEditText() {
@@ -88,5 +89,8 @@ public class InputConfirmPopupView extends ConfirmPopupView implements View.OnCl
                 inputConfirmListener.onConfirm(et_input.getText().toString().trim());
             if (popupInfo.autoDismiss) dismiss();
         }
+    }
+    protected int getMaxWidth() {
+        return popupInfo.maxWidth==0 ? super.getMaxWidth() : popupInfo.maxWidth;
     }
 }

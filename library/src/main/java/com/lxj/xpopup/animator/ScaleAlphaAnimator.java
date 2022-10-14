@@ -3,7 +3,6 @@ package com.lxj.xpopup.animator;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
-import com.lxj.xpopup.XPopup;
 import com.lxj.xpopup.enums.PopupAnimation;
 
 /**
@@ -11,14 +10,15 @@ import com.lxj.xpopup.enums.PopupAnimation;
  * Create by dance, at 2018/12/9
  */
 public class ScaleAlphaAnimator extends PopupAnimator {
-    public ScaleAlphaAnimator(View target, PopupAnimation popupAnimation) {
-        super(target, popupAnimation);
+    public ScaleAlphaAnimator(View target, int animationDuration, PopupAnimation popupAnimation) {
+        super(target, animationDuration, popupAnimation);
     }
 
+    float startScale = .95f;
     @Override
     public void initAnimator() {
-        targetView.setScaleX(0f);
-        targetView.setScaleY(0f);
+        targetView.setScaleX(startScale);
+        targetView.setScaleY(startScale);
         targetView.setAlpha(0);
 
         // 设置动画参考点
@@ -36,8 +36,8 @@ public class ScaleAlphaAnimator extends PopupAnimator {
     private void applyPivot() {
         switch (popupAnimation) {
             case ScaleAlphaFromCenter:
-                targetView.setPivotX(targetView.getMeasuredWidth() / 2);
-                targetView.setPivotY(targetView.getMeasuredHeight() / 2);
+                targetView.setPivotX(targetView.getMeasuredWidth() / 2f);
+                targetView.setPivotY(targetView.getMeasuredHeight() / 2f);
                 break;
             case ScaleAlphaFromLeftTop:
                 targetView.setPivotX(0);
@@ -65,7 +65,7 @@ public class ScaleAlphaAnimator extends PopupAnimator {
             @Override
             public void run() {
                 targetView.animate().scaleX(1f).scaleY(1f).alpha(1f)
-                        .setDuration(XPopup.getAnimationDuration())
+                        .setDuration(animationDuration)
                         .setInterpolator(new OvershootInterpolator(1f))
 //                .withLayer() 在部分6.0系统会引起crash
                         .start();
@@ -75,8 +75,9 @@ public class ScaleAlphaAnimator extends PopupAnimator {
 
     @Override
     public void animateDismiss() {
-        targetView.animate().scaleX(0f).scaleY(0f).alpha(0f).setDuration(XPopup.getAnimationDuration())
-                .setInterpolator(new FastOutSlowInInterpolator())
+        if(animating)return;
+        observerAnimator(targetView.animate().scaleX(startScale).scaleY(startScale).alpha(0f).setDuration(animationDuration)
+                .setInterpolator(new FastOutSlowInInterpolator()))
 //                .withLayer() 在部分6.0系统会引起crash
                 .start();
     }

@@ -1,26 +1,25 @@
 package com.lxj.xpopupdemo.custom;
 
+import android.app.Activity;
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-
 import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleObserver;
 
 import com.lxj.easyadapter.EasyAdapter;
 import com.lxj.easyadapter.ViewHolder;
+import com.lxj.xpopup.XPopup;
 import com.lxj.xpopup.core.DrawerPopupView;
+import com.lxj.xpopup.interfaces.OnConfirmListener;
 import com.lxj.xpopup.widget.VerticalRecyclerView;
-import com.lxj.xpopupdemo.DemoActivity;
 import com.lxj.xpopupdemo.R;
-import com.lxj.xpopupdemo.fragment.AllAnimatorDemo;
-import com.lxj.xpopupdemo.fragment.QuickStartDemo;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * Description: 自定义抽屉弹窗
@@ -28,16 +27,20 @@ import java.util.Random;
  */
 public class CustomDrawerPopupView extends DrawerPopupView {
     TextView text;
+
     public CustomDrawerPopupView(@NonNull Context context) {
         super(context);
     }
+
     @Override
     protected int getImplLayoutId() {
         return R.layout.custom_drawer_popup2;
     }
+
     @Override
     protected void onCreate() {
         super.onCreate();
+//        CustomDrawerPopup2Binding.bind(getPopupImplView());
         Log.e("tag", "CustomDrawerPopupView onCreate");
 //        text = findViewById(R.id.text);
 //        findViewById(R.id.btn).setOnClickListener(new OnClickListener() {
@@ -48,26 +51,38 @@ public class CustomDrawerPopupView extends DrawerPopupView {
 //        });
 
         //通过设置topMargin，可以让Drawer弹窗进行局部阴影展示
-//        ViewGroup.MarginLayoutParams params = (MarginLayoutParams) getPopupContentView().getLayoutParams();
-//        params.topMargin = 450;
+//        setPadding(0, 400, 0, 0);
 
         VerticalRecyclerView rv = findViewById(R.id.rv);
         ArrayList<String> list = new ArrayList();
-        for (int i = 0; i < 599; i++) {
-            list.add(i+"");
+        for (int i = 0; i < 200; i++) {
+            list.add(i + "");
         }
         rv.setAdapter(new EasyAdapter(list, R.layout.temp) {
             @Override
             protected void bind(ViewHolder viewHolder, Object o, int i) {
-                if(i%2==0){
+                if (i % 2 == 0) {
                     viewHolder.<TextView>getView(R.id.text).setText("aa - " + i);
                     viewHolder.<TextView>getView(R.id.text).setBackgroundColor(Color.WHITE);
-                }else {
+                } else {
                     viewHolder.<TextView>getView(R.id.text).setText("aa - " + i + "大萨达所撒多" +
                             "\n大萨达所撒多大萨达所撒多");
                     viewHolder.<TextView>getView(R.id.text).setBackgroundColor(Color.RED);
 
                 }
+            }
+        });
+        findViewById(R.id.btnMe).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new XPopup.Builder(getContext()).isDestroyOnDismiss(true)
+                        .asConfirm("提示", "确定要退出吗？", new OnConfirmListener() {
+                            @Override
+                            public void onConfirm() {
+                                ((Activity)getContext()).finish();
+                                dismiss();
+                            }
+                        }).show();
             }
         });
     }

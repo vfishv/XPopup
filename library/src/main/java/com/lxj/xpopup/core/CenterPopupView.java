@@ -36,7 +36,7 @@ public class CenterPopupView extends BasePopupView {
     }
 
     @Override
-    protected int getPopupLayoutId() {
+    final protected int getInnerLayoutId() {
         return R.layout._xpopup_center_popup_view;
     }
 
@@ -46,7 +46,8 @@ public class CenterPopupView extends BasePopupView {
         if(centerPopupContainer.getChildCount()==0)addInnerContent();
         getPopupContentView().setTranslationX(popupInfo.offsetX);
         getPopupContentView().setTranslationY(popupInfo.offsetY);
-        XPopupUtils.applyPopupSize((ViewGroup) getPopupContentView(), getMaxWidth(), getMaxHeight());
+        XPopupUtils.applyPopupSize((ViewGroup) getPopupContentView(), getMaxWidth(), getMaxHeight(),
+                getPopupWidth(), getPopupHeight(),null);
     }
     protected void applyTheme(){
         if(bindLayoutId==0) {
@@ -75,7 +76,7 @@ public class CenterPopupView extends BasePopupView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        setTranslationY(0);
+//        setTranslationY(0);
     }
 
     /**
@@ -88,12 +89,12 @@ public class CenterPopupView extends BasePopupView {
     }
 
     protected int getMaxWidth() {
-        return popupInfo.maxWidth==0 ? (int) (XPopupUtils.getWindowWidth(getContext()) * 0.8f)
+        return popupInfo.maxWidth==0 ? (int) (XPopupUtils.getAppWidth(getContext()) * 0.72f)
                 : popupInfo.maxWidth;
     }
 
     @Override
     protected PopupAnimator getPopupAnimator() {
-        return new ScaleAlphaAnimator(getPopupContentView(), ScaleAlphaFromCenter);
+        return new ScaleAlphaAnimator(getPopupContentView(), getAnimationDuration(), ScaleAlphaFromCenter);
     }
 }

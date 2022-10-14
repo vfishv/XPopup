@@ -1,5 +1,6 @@
 package com.lxj.xpopupdemo.fragment;
 
+import android.graphics.Color;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -37,7 +38,6 @@ public class PartShadowDemo extends BaseFragment implements View.OnClickListener
         return R.layout.fragment_part_shadow_demo;
     }
 
-    CustomPartShadowPopupView2 customPartShadowPopupView2;
     @Override
     public void init(View view) {
         ll_container = view.findViewById(R.id.ll_container);
@@ -60,25 +60,20 @@ public class PartShadowDemo extends BaseFragment implements View.OnClickListener
         EasyAdapter<String> adapter = new EasyAdapter<String>(data, android.R.layout.simple_list_item_1) {
             @Override
             protected void bind(@NonNull ViewHolder holder, @NonNull String s, int position) {
+                holder.getConvertView().setBackgroundColor(Color.parseColor("#fafafa"));
                 holder.setText(android.R.id.text1, "长按我试试 - " + position);
                 //必须要在事件发生之前就watch
-                final XPopup.Builder builder = new XPopup.Builder(getContext()).watchView(holder.itemView);
-                holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                final XPopup.Builder builder = new XPopup.Builder(getContext())
+                        .hasShadowBg(false).watchView(holder.getConvertView());
+                holder.getConvertView().setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
-                        if(customPartShadowPopupView2==null){
-                            customPartShadowPopupView2 = (CustomPartShadowPopupView2) new XPopup.Builder(getContext())
-                                    .atView(v).asCustom(new CustomPartShadowPopupView2(getContext()));
-                        }else {
-//                            customPartShadowPopupView2.updatePosition();
-                        }
-                        customPartShadowPopupView2.show();
-//                        builder.asAttachList(new String[]{"置顶", "编辑", "删除"}, null, new OnSelectListener() {
-//                            @Override
-//                            public void onSelect(int position, String text) {
-//                                toast(text);
-//                            }
-//                        }).show();
+                        builder.asAttachList(new String[]{"置顶", "编辑", "删除"}, null, new OnSelectListener() {
+                            @Override
+                            public void onSelect(int position, String text) {
+                                toast(text);
+                            }
+                        }).show();
                         return true;
                     }
                 });
@@ -90,20 +85,23 @@ public class PartShadowDemo extends BaseFragment implements View.OnClickListener
                 toast(data.get(position));
             }
         });
+        recyclerView.setupDivider(false);
         recyclerView.setAdapter(adapter);
     }
 
     private void showPartShadow(final View v){
-//        if(popupView==null){
+        if(popupView==null){
             popupView = (CustomPartShadowPopupView) new XPopup.Builder(getContext())
                     .atView(v)
-                    .isClickThrough(true)
-//                    .dismissOnTouchOutside(false)
+//                    .isClickThrough(true)
+//                    .isViewMode(true)
+//                    .isRequestFocus(false)
+//                    .isTouchThrough(true)
+//                    .notDismissWhenTouchInView(view.findViewById(R.id.tv_select))
 //                    .isCenterHorizontal(true)
                     .autoOpenSoftInput(true)
-//                    .offsetY(-150)
+//                    .offsetY(250)
 //                    .offsetX(100)
-//                .dismissOnTouchOutside(false)
                     .setPopupCallback(new SimpleCallback() {
                         @Override
                         public void onShow(BasePopupView popupView) {
@@ -114,11 +112,12 @@ public class PartShadowDemo extends BaseFragment implements View.OnClickListener
                         }
                     })
                     .asCustom(new CustomPartShadowPopupView(getContext()));
-//        }
+        }
 
         popupView.show();
     }
 
+    CustomPartShadowPopupView2 popupView2;
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -129,8 +128,9 @@ public class PartShadowDemo extends BaseFragment implements View.OnClickListener
                 break;
             case R.id.tv_filter:
                 new XPopup.Builder(getContext())
+                        .isDestroyOnDismiss(true)
                         .popupPosition(PopupPosition.Right)//右边
-                        .hasStatusBarShadow(true) //启用状态栏阴影
+//                        .hasStatusBarShadow(true) //启用状态栏阴影
                         .asCustom(drawerPopupView)
                         .show();
                 break;
@@ -143,15 +143,20 @@ public class PartShadowDemo extends BaseFragment implements View.OnClickListener
             case R.id.tvCenter:
                 new XPopup.Builder(getContext())
                         .atView(v)
+                        .isViewMode(true)
                         .popupPosition(PopupPosition.Top)
                         .asCustom(new CustomPartShadowPopupView2(getContext()))
                         .show();
                 break;
             case R.id.tvCenter2:
+                if(popupView2==null){
+                    popupView2 = new CustomPartShadowPopupView2(getContext());
+                }
                 new XPopup.Builder(getContext())
                         .atView(v)
+                        .isViewMode(true)
                         .popupPosition(PopupPosition.Bottom)
-                        .asCustom(new CustomPartShadowPopupView2(getContext()))
+                        .asCustom(popupView2)
                         .show();
                 break;
         }

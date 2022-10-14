@@ -1,6 +1,8 @@
 package com.lxj.xpopupdemo;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,16 +11,13 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.blankj.utilcode.util.AppUtils;
 import com.blankj.utilcode.util.BarUtils;
-import com.blankj.utilcode.util.KeyboardUtils;
-import com.blankj.utilcode.util.PhoneUtils;
+import com.blankj.utilcode.util.RomUtils;
 import com.blankj.utilcode.util.ScreenUtils;
-import com.blankj.utilcode.util.ToastUtils;
 import com.google.android.material.tabs.TabLayout;
 import com.lxj.xpopup.XPopup;
 import com.lxj.xpopup.impl.LoadingPopupView;
-import com.lxj.xpopup.util.FuckRomUtils;
+import com.lxj.xpopup.util.XPopupUtils;
 import com.lxj.xpopupdemo.fragment.AllAnimatorDemo;
 import com.lxj.xpopupdemo.fragment.CustomAnimatorDemo;
 import com.lxj.xpopupdemo.fragment.CustomPopupDemo;
@@ -40,14 +39,16 @@ public class MainActivity extends AppCompatActivity {
     TabLayout tabLayout;
     public ViewPager viewPager;
 
-    LoadingPopupView loadingPopupView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-//        BarUtils.setStatusBarLightMode(this, true);
+//        BarUtils.setStatusBarLightMode(this, false);
 //        BarUtils.setNavBarColor(this, Color.RED);
+//        BarUtils.setStatusBarVisibility();
+//        BarUtils.setNavBarColor(this, Color.parseColor("#333333"));
+//        BarUtils.setNavBarLightMode(this, true);
+//        BarUtils.setNavBarVisibility(MainActivity.this, false);
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(actionBar.getTitle() + "-" + BuildConfig.VERSION_NAME);
@@ -57,20 +58,29 @@ public class MainActivity extends AppCompatActivity {
 
         viewPager.setAdapter(new MainAdapter(getSupportFragmentManager()));
         tabLayout.setupWithViewPager(viewPager);
-
         XPopup.setPrimaryColor(getResources().getColor(R.color.colorPrimary));
-//        XPopup.setAnimationDuration(1000);
+//        XPopup.setAnimationDuration(400);
+//        XPopup.setIsLightStatusBar(false);
 //        XPopup.setPrimaryColor(Color.RED);
-//        ScreenUtils.setLandscape(this);
-        loadingPopupView = new XPopup.Builder(this).asLoading("嘻嘻嘻嘻嘻");
+//        XPopup.setIsLightStatusBar(true);
+//        XPopup.setNavigationBarColor(Color.RED);
+        final LoadingPopupView loadingPopupView = new XPopup.Builder(this)
+                .isDestroyOnDismiss(true)
+                .asLoading();
+
         loadingPopupView.show();
         loadingPopupView.delayDismiss(1200);
 
-//        BarUtils.setStatusBarVisibility(this, false);
-//        BarUtils.setNavBarVisibility(this, false);
+//        new XPopup.Builder(this).asConfirm("asda", "dasdadas", null).show();
 
-//        ToastUtils.showLong(FuckRomUtils.getRomInfo().getName() + FuckRomUtils.getRomInfo().getVersion());
-//        ToastUtils.showLong(android.os.Build.MODEL);
+        String str = RomUtils.getRomInfo().toString() + " " + "deviceHeight：" + XPopupUtils.getScreenHeight(MainActivity.this)
+                + "  getAppHeight: " + XPopupUtils.getAppHeight(MainActivity.this)
+                + " deviceWidth: " + XPopupUtils.getScreenWidth(MainActivity.this)
+                + " getAppWidth: " + XPopupUtils.getAppWidth(MainActivity.this)
+                + "  statusHeight: " + XPopupUtils.getStatusBarHeight()
+                + "  navHeight: " + XPopupUtils.getNavBarHeight()
+                + "  hasNav: " + XPopupUtils.isNavBarVisible(getWindow());
+        Log.e("tag", str);
     }
 
     class MainAdapter extends FragmentPagerAdapter {
@@ -94,14 +104,6 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             return pageInfos[position].title;
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        viewPager.removeAllViews();
-        viewPager = null;
-        pageInfos = null;
     }
 
 }

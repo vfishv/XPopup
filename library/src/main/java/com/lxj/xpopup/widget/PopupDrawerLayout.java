@@ -6,15 +6,15 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsSeekBar;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
-
 import androidx.annotation.NonNull;
 import androidx.core.view.ViewCompat;
 import androidx.customview.widget.ViewDragHelper;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
-
-import com.lxj.xpopup.animator.ShadowBgAnimator;
+import androidx.viewpager2.widget.ViewPager2;
 import com.lxj.xpopup.enums.LayoutStatus;
 import com.lxj.xpopup.enums.PopupPosition;
 import com.lxj.xpopup.util.XPopupUtils;
@@ -30,10 +30,7 @@ public class PopupDrawerLayout extends FrameLayout {
     ViewDragHelper dragHelper;
     View placeHolder, mChild;
     public PopupPosition position = PopupPosition.Left;
-    ShadowBgAnimator bgAnimator = new ShadowBgAnimator();
-    public boolean isDrawStatusBarShadow = false;
     float fraction = 0f;
-    public boolean enableShadow = true;
     public boolean enableDrag = true;
 
     public PopupDrawerLayout(Context context) {
@@ -140,21 +137,32 @@ public class PopupDrawerLayout extends FrameLayout {
             Rect rect = new Rect(location[0], location[1], location[0] + child.getWidth(),
                     location[1] + child.getHeight());
             boolean inRect = XPopupUtils.isInRect(x, y, rect);
-            if (inRect && child instanceof ViewGroup) {
-                if (child instanceof ViewPager) {
-                    ViewPager pager = (ViewPager) child;
-                    if (direction == 0) {
-                        return pager.canScrollHorizontally(-1) || pager.canScrollHorizontally(1);
+            if (inRect) {
+                if(child instanceof ViewGroup){
+                    if (child instanceof ViewPager) {
+                        ViewPager pager = (ViewPager) child;
+                        if (direction == 0) {
+                            boolean b =pager.canScrollHorizontally(-1) || pager.canScrollHorizontally(1);
+                            return pager.canScrollHorizontally(-1) || pager.canScrollHorizontally(1);
+                        }
+                        return pager.canScrollHorizontally(direction);
+                    } else if (child instanceof HorizontalScrollView) {
+                        HorizontalScrollView hsv = (HorizontalScrollView) child;
+                        if (direction == 0) {
+                            return hsv.canScrollHorizontally(-1) || hsv.canScrollHorizontally(1);
+                        }
+                        return hsv.canScrollHorizontally(direction);
+                    } else if (child instanceof ViewPager2) {
+                        ViewPager2 pager2 = (ViewPager2) child;
+                        RecyclerView rv = (RecyclerView) pager2.getChildAt(0);
+                        return rv.canScrollHorizontally(-1) || rv.canScrollHorizontally(1);
+                    } else {
+                        return canScroll((ViewGroup) child, x, y, direction);
                     }
-                    return pager.canScrollHorizontally(direction);
-                } else if (child instanceof HorizontalScrollView) {
-                    HorizontalScrollView hsv = (HorizontalScrollView) child;
-                    if (direction == 0) {
-                        return hsv.canScrollHorizontally(-1) || hsv.canScrollHorizontally(1);
+                }else {
+                    if (child instanceof AbsSeekBar && child.isEnabled()){
+                        return true;
                     }
-                    return hsv.canScrollHorizontally(direction);
-                } else {
-                    return canScroll((ViewGroup) child, x, y, direction);
                 }
             }
         }
@@ -176,7 +184,7 @@ public class PopupDrawerLayout extends FrameLayout {
     ViewDragHelper.Callback callback = new ViewDragHelper.Callback() {
         @Override
         public boolean tryCaptureView(@NonNull View view, int i) {
-            return !dragHelper.continueSettling(true) && status!=LayoutStatus.Close;
+            return enableDrag && !dragHelper.continueSettling(true) && status!=LayoutStatus.Close;
         }
         @Override
         public int getViewHorizontalDragRange(@NonNull View child) {
@@ -217,7 +225,6 @@ public class PopupDrawerLayout extends FrameLayout {
                     listener.onClose();
                 }
             }
-            if (enableShadow) setBackgroundColor(bgAnimator.calculateBgColor(fraction));
             if (listener != null) {
                 listener.onDrag(left, fraction, dx<0);
                 if (fraction == 1f && status != LayoutStatus.Open) {
@@ -231,7 +238,7 @@ public class PopupDrawerLayout extends FrameLayout {
         public void onViewReleased(@NonNull View releasedChild, float xvel, float yvel) {
             super.onViewReleased(releasedChild, xvel, yvel);
             if (releasedChild == placeHolder && xvel == 0) {
-                close();
+                if(isDismissOnTouchOutside) close();
                 return;
             }
             if (releasedChild == mChild && isToLeft && !canChildScrollLeft && xvel < -500) {
@@ -284,10 +291,10 @@ public class PopupDrawerLayout extends FrameLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        status = null;
-        hasLayout = false;
-        fraction = 0f;
-        setTranslationY(ty);
+//        status = null;
+//        hasLayout = false;
+//        fraction = 0f;
+//        setTranslationY(ty);
     }
 
     /**
@@ -303,14 +310,12 @@ public class PopupDrawerLayout extends FrameLayout {
         });
     }
 
-    public boolean isCanClose = true;
+    public boolean isDismissOnTouchOutside = true;
 
     /**
      * 关闭Drawer
      */
     public void close() {
-//        if (dragHelper.continueSettling(true)) return;
-        if (!isCanClose) return;
         post(new Runnable() {
             @Override
             public void run() {
@@ -322,7 +327,6 @@ public class PopupDrawerLayout extends FrameLayout {
     }
 
     private OnCloseListener listener;
-
     public void setOnCloseListener(OnCloseListener listener) {
         this.listener = listener;
     }
